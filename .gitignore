@@ -1,0 +1,12 @@
+.env
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Documentation (If using Swagger/Redoc locally) ---
+docs/_build/
+node_modules/
+
+# --- Extra security ---
+secrets.json
+*.key
