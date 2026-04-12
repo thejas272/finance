@@ -54,6 +54,20 @@ class AdminUserHandleAPIView(APIView):
 
     return paginator.get_paginated_response(serializer.data)
   
+class AdminUserHandleDetailAPIView(APIView):
+  permission_classes = [IsAuthenticated,IsAdmin]
+  @swagger_auto_schema(tags=["User"])
+  def delete(self,requesst,id):
+    try:
+      user = models.User.objects.get(id=id)
+    except models.User.DoesNotExist:
+      return Response("Invalid id, user not found.",status=status.HTTP_404_NOT_FOUND)
+    
+    user.is_active = False
+    user.save()
+    return Response("User deleted successfuly.",status=status.HTTP_200_OK)
+
+  
 
 
 
