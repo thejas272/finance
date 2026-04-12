@@ -30,3 +30,20 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     return user
   
 
+
+class AdminUserHandleSerializer(serializers.ModelSerializer):
+
+  class Meta:
+    model = models.User
+    fields = "__all__"
+    extra_kwargs = {
+      "password":{"write_only":True}
+    }
+    read_only_fields = ["last_login","date_joined"]
+
+  
+  def create(self, validated_data):
+    user = models.User.objects.create_user(**validated_data)
+    user.set_password(validated_data["password"])
+    user.save()
+    return user
