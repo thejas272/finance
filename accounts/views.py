@@ -32,7 +32,7 @@ class AdminUserHandleAPIView(APIView):
   permission_classes = [IsAuthenticated, IsAdmin]
 
 
-  @swagger_auto_schema(tags=["User"], request_body=serializers.AdminUserHandleSerializer)
+  @swagger_auto_schema(tags=["Admin"], request_body=serializers.AdminUserHandleSerializer)
   def post(self,request):
     serializer = serializers.AdminUserHandleSerializer(data=request.data)
 
@@ -43,9 +43,9 @@ class AdminUserHandleAPIView(APIView):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
 
-  @swagger_auto_schema(tags=["User"])
+  @swagger_auto_schema(tags=["Admin"])
   def get(self,request):
-    users = models.User.objects.all()
+    users = models.User.objects.all().exclude(id=request.user.id)
 
     paginator = DefaultPagination()
     paginated_data = paginator.paginate_queryset(users, request)
@@ -54,9 +54,12 @@ class AdminUserHandleAPIView(APIView):
 
     return paginator.get_paginated_response(serializer.data)
   
+
+
 class AdminUserHandleDetailAPIView(APIView):
   permission_classes = [IsAuthenticated,IsAdmin]
-  @swagger_auto_schema(tags=["User"])
+  
+  @swagger_auto_schema(tags=["Admin"])
   def delete(self,requesst,id):
     try:
       user = models.User.objects.get(id=id)
@@ -66,6 +69,24 @@ class AdminUserHandleDetailAPIView(APIView):
     user.is_active = False
     user.save()
     return Response("User deleted successfuly.",status=status.HTTP_200_OK)
+  
+  @swagger_auto_schema(tags=["Admin"], request_body=serializers.AdminUserHandleSerializer)
+  def patch(self,request,id):
+    try:
+      user = models.User.objects.get(id=id)
+    except models.User.DoesNotExist:
+      return Response({"error":"Invalid user info. User not found."},status=status.HTTP_404_NOT_FOUND)
+    
+
+    serializer = serializers.AdminUserHandleSerializer(user,data=request.data,partial=True)
+
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+  
+
 
   
 
