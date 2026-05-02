@@ -6,8 +6,11 @@ from rest_framework.permissions import AllowAny,IsAdminUser,IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from transactions import models as transactions_models
+from accounts import models as accounts_models
 from transactions import serializers
 from common.pagination import DefaultPagination
+from transactions.helpers import get_user
+from django.db.models import Sum
 # Create your views here.
 
 
@@ -30,3 +33,33 @@ class TransactionsView(APIView):
     serializer = serializers.TransactionSerializer(paginated_data, many=True)
 
     return paginator.get_paginated_response(serializer.data)
+  
+
+class DashbordView(APIView):
+  permission_classes = [IsAuthenticated]
+
+  @swagger_auto_schema(tags=["Dashboard"])
+  def get(self,request):
+
+    user_instance = get_user(request)
+
+    user_transactions = user_instance.transactions.all()
+
+    total_credit = user_transactions.filter(type="credit").aggregate(total=Sum("amount"))["total"] or 0
+    total_debit = user_transactions.filter(type="debit").aggregate(total=Sum("amount"))["total"] or 0
+
+    balance = total_credit - total_debit
+
+    return Response({"total_credit":total_credit,
+            "total_debit":total_debit,
+            "balance":balance
+           }, status=status.HTTP_200_OK
+           )
+  
+
+
+
+
+
+
+      
