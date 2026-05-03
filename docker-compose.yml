@@ -2,11 +2,9 @@ version: '3.9'
 
 services:
   web:
-    build: .
+    image: thejas2722/finance-web:latest
     container_name: drf_finance_bknd
     command: gunicorn finance.wsgi:application --bind 0.0.0.0:8000
-    volumes:
-      - .:/app
     ports:
       - "8000:8000"
     depends_on:

@@ -50,9 +50,12 @@ class DashbordView(APIView):
 
     balance = total_credit - total_debit
 
+    category = user_transactions.values("category").annotate(total=Sum("amount"))
+
     return Response({"total_credit":total_credit,
             "total_debit":total_debit,
-            "balance":balance
+            "balance":balance,
+            "category":category
            }, status=status.HTTP_200_OK
            )
   
